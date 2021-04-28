@@ -91,12 +91,11 @@
         // 有参数
         id point = [command.arguments objectAtIndex:0];
         if ([point isKindOfClass:[NSString class]]) {
-            effectValue = (long)point;
+            effectEvent = (NSString *)point;
         }
         id val = [command.arguments objectAtIndex:1];
-        if ([val isKindOfClass:[NSNumber class]]){
-            NSNumber *valResult = (NSNumber *)val;
-            effectValue = [valResult longValue];
+        if ([val isKindOfClass:[NSNumber class]] || [val isKindOfClass:[NSString class]]){
+            effectValue = (long)[val longLongValue];
         }
         [[XinstallSDK defaultManager] reportEventPoint:effectEvent eventValue:effectValue];
     }
