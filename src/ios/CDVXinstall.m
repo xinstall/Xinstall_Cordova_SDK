@@ -16,6 +16,50 @@
 @end
 
 @implementation CDVXinstall
++ (BOOL)isEmptyData:(XinstallData *)data {
+    if (data == nil) {
+        return YES;
+    }
+    
+    if (data.channelCode.length > 0) {
+        return NO;
+    }
+    
+    if (data.timeSpan > 0) {
+        return NO;
+    }
+    
+    if ([data.data isKindOfClass:[NSDictionary class]]) {
+        id objUo = [((NSDictionary *)data.data) objectForKey:@"uo"];
+        if ([objUo isKindOfClass:[NSDictionary class]]) {
+            if (((NSDictionary *)objUo).count > 0) {
+                return NO;
+            }
+        } else if ([objUo isKindOfClass:[NSString class]]) {
+            if (((NSString *)objUo).length > 0) {
+                return NO;
+            }
+        }
+    }
+    
+    if ([data.data isKindOfClass:[NSDictionary class]]) {
+        id objCo = [((NSDictionary *)data.data) objectForKey:@"co"];
+        if ([objCo isKindOfClass:[NSDictionary class]]) {
+            if (((NSDictionary *)objCo).count > 0) {
+                return NO;
+            }
+        } else if ([objCo isKindOfClass:[NSString class]]) {
+            if (((NSString *)objCo).length > 0) {
+                return NO;
+            }
+        }
+    }
+    
+    return YES;
+}
+
+#pragma mark - init
+
 - (void)pluginInitialize {
     NSString* appKey = [[self.commandDelegate settings] objectForKey:@"com.xinstall.app_key"];
     [XinstallSDK defaultManager];
@@ -43,13 +87,38 @@
     [[XinstallSDK defaultManager] getInstallParamsWithCompletion:^(XinstallData * _Nullable installData, XinstallError * _Nullable error) {
         __strong __typeof(weakSelf) self = weakSelf;
         NSDictionary *installMsgDic = @{};
-        if (error == nil) {
+        if (![CDVXinstall isEmptyData:installData]) {
             NSString *channelCode = @"";
-            NSDictionary *datas = @{};
             NSString * timeSpan = @"0";
             
-            if (installData.data) {
-                datas = installData.data;
+            NSDictionary *uo;
+            NSDictionary *co;
+            NSMutableDictionary *dataDic = [NSMutableDictionary dictionary];
+            if ([installData.data isKindOfClass:[NSDictionary class]]) {
+                uo = [installData.data objectForKey:@"uo"];
+                co = [installData.data objectForKey:@"co"];
+            }
+            
+            if (uo) {
+                id uoJson;
+                if ([uo isKindOfClass:[NSDictionary class]]) {
+                    uoJson = uo;
+                } else if ([uo isKindOfClass:[NSString class]]) {
+                    uoJson = uo;
+                }
+            
+                [dataDic setValue:uoJson?:@{} forKey:@"uo"];
+            }
+            
+            if (co) {
+                id coJson;
+                if ([co isKindOfClass:[NSDictionary class]]) {
+                    coJson = co;
+                } else if ([uo isKindOfClass:[NSString class]]) {
+                    coJson = co;
+                }
+            
+                [dataDic setValue:coJson?:@{} forKey:@"co"];
             }
             
             if (installData.channelCode) {
@@ -59,7 +128,7 @@
             if (installData.timeSpan > 0) {
                 timeSpan = [NSString stringWithFormat:@"%zd",installData.timeSpan];
             }
-            installMsgDic = @{@"channelCode": channelCode,@"timeSpan":timeSpan, @"data": datas,@"isFirstFetch":@(installData.isFirstFetch)};
+            installMsgDic = @{@"channelCode": channelCode,@"timeSpan":timeSpan, @"data": dataDic,@"isFirstFetch":@(installData.isFirstFetch)};
              
         }
         CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[installMsgDic copy]];
@@ -67,12 +136,13 @@
     }];
 }
 
+
+
 - (void)registerWakeUpHandler:(CDVInvokedUrlCommand *)command {
     if (self.dicWakeUp) {
         // 调起已执行，并有数据
         [self.marrWakeUpCallbackId addObject:command.callbackId];
         CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self.dicWakeUp copy]];
-        commandResult.keepCallback = @(YES);
         [self.commandDelegate sendPluginResult:commandResult callbackId:command.callbackId];
         self.dicWakeUp = nil;
     } else {
@@ -132,29 +202,59 @@
 
 #pragma mark - XinstallDelegate methods
 - (void)xinstall_getWakeUpParams:(XinstallData *)appData {
-    NSString *channelCode = @"";
-    NSDictionary *datas = @{};
-    NSString * timeSpan = @"0";
     
-    if (appData.data) {
-        datas = appData.data;
+    NSDictionary *wakeMsgDic = @{};
+    
+    if (![CDVXinstall isEmptyData:appData]) {
+        NSString *channelCode = @"";
+        NSString * timeSpan = @"0";
+        
+        NSDictionary *uo;
+        NSDictionary *co;
+        NSMutableDictionary *dataDic = [NSMutableDictionary dictionary];
+        if ([appData.data isKindOfClass:[NSDictionary class]]) {
+            uo = [appData.data objectForKey:@"uo"];
+            co = [appData.data objectForKey:@"co"];
+        }
+        
+        if (uo) {
+            id uoJson;
+            if ([uo isKindOfClass:[NSDictionary class]]) {
+                uoJson = uo;
+            } else if ([uo isKindOfClass:[NSString class]]) {
+                uoJson = uo;
+            }
+        
+            [dataDic setValue:uoJson?:@{} forKey:@"uo"];
+        }
+        
+        if (co) {
+            id coJson;
+            if ([co isKindOfClass:[NSDictionary class]]) {
+                coJson = co;
+            } else if ([uo isKindOfClass:[NSString class]]) {
+                coJson = co;
+            }
+        
+            [dataDic setValue:coJson?:@{} forKey:@"co"];
+        }
+        
+        if (appData.channelCode) {
+            channelCode = appData.channelCode;
+        }
+        
+        if (appData.timeSpan > 0) {
+            timeSpan = [NSString stringWithFormat:@"%zd",appData.timeSpan];
+        }
+
+        wakeMsgDic = @{@"channelCode": channelCode,@"timeSpan":timeSpan, @"data": dataDic};
     }
     
-    if (appData.channelCode) {
-        channelCode = appData.channelCode;
-    }
-    
-    if (appData.timeSpan > 0) {
-        timeSpan = [NSString stringWithFormat:@"%zd",appData.timeSpan];
-    }
-    
-    NSDictionary *wakeMsgDic = @{@"channelCode": channelCode,@"timeSpan":timeSpan, @"data": datas};
     
     if (self.marrWakeUpCallbackId.count > 0) {
         for (int i = 0; i < self.marrWakeUpCallbackId.count; i++) {
             NSString *callBackId = [self.marrWakeUpCallbackId objectAtIndex:i];
             CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[wakeMsgDic copy]];
-            commandResult.keepCallback = @(YES);
             [self.commandDelegate sendPluginResult:commandResult callbackId:callBackId];
         }
     } else {

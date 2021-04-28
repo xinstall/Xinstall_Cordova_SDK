@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-xinstall",
-  "version": "1.2.6",
+  "version": "1.2.9",
   "description": "Xinstall 为了用户更方便的接入SDK，基于原生SDK封装的CordovaSDK",
   "cordova": {
     "id": "cordova-plugin-xinstall",
