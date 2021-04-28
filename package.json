@@ -1,0 +1,25 @@
+{
+  "name": "cordova-plugin-xinstall",
+  "version": "1.2.2",
+  "description": "Xinstall 为了用户更方便的接入SDK，基于原生SDK封装的CordovaSDK",
+  "cordova": {
+    "id": "cordova-plugin-xinstall",
+    "platforms": [
+      "ios"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xinstall/Xinstall_Cordova_SDK.git"
+  },
+  "keywords": [
+    "一键拉起",
+    "免邀请码",
+    "Xinstall",
+    "xinstall",
+    "渠道推广",
+    "App渠道推广"
+  ],
+  "author": "hiXinstall",
+  "license": "MIT"
+}

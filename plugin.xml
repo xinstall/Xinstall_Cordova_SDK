@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<plugin id="cordova-plugin-xinstall" version="1.1.10"
+    xmlns="http://phonegap.com/ns/plugins/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+    <name>XinstallCordovaSDK</name>
+    <description>Xinstall 为了用户更方便的接入SDK，基于原生SDK封装的CordovaSDK</description>
+    
+    <preference name="XINSTALL_APPKEY"/>
+    <preference name="XINSTALL_SCHEME"/>
+    
+    <!-- android -->
+    <platform name="android">
+        <!--    对应js映射文件的地址及名称-->
+        <js-module name="xinstall" src="www/cordova-plugin-xinstall.js">
+            <!--    js调用时的对象名称-->
+            <clobbers target="xinstall" />
+        </js-module>
+        
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="XinstallPlugin">
+                <param name="android-package" value="io.xinstall.cordova.XinstallPlugin"/>
+                <param name="onload" value="true" />
+            </feature>
+        </config-file>
+        
+        <!-- 网络配置 -->
+        <config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.permission.INTERNET"/>
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+            <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+        </config-file>
+        
+        <!-- 配置Android的 XINSTALL_APPKEY -->
+        <config-file target="AndroidManifest.xml" parent="/manifest/application">
+            <meta-data
+                android:name="com.xinstall.APP_KEY"
+                android:value="$XINSTALL_APPKEY"/>
+        </config-file>
+        
+        <!-- 配置scheme -->
+        <config-file target="AndroidManifest.xml" parent="/manifest/application/activity[@android:name='MainActivity']">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="$XINSTALL_SCHEME" />
+            </intent-filter>
+        </config-file>
+        
+        <!-- MainActivity 配置singleTask -->
+        <edit-config file="AndroidManifest.xml" target="/manifest/application/activity[@android:name='MainActivity']" mode="merge">
+            <activity android:launchMode="singleTask"/>
+        </edit-config>
+        
+        <source-file src="src/android/XinstallPlugin.java" target-dir="src/io/xinstall/cordova" />
+        
+        <source-file src="src/android/libs/XInstallSDK.aar" target-dir="libs" />
+        <framework src="src/android/libs/XInstallSDK.gradle" custom="true" type="gradleReference" />
+        
+    </platform>
+
+    <!--ios所有文件的存放地址-->
+    <!--如果有图片的话也需要在这里配置,前缀是source-file-->
+    <platform name="ios">
+        
+        <!--    对应js映射文件的地址及名称-->
+        <js-module name="xinstall" src="www/cordova-plugin-xinstall.js">
+            <!--    js调用时的对象名称-->
+            <clobbers target="xinstall" />
+        </js-module>
+        
+        <config-file target="config.xml" parent="/*">
+            <feature name="XinstallPlugin">
+                <param name="ios-package" value="CDVXinstall"/>
+                <param name="onload" value="true" />
+            </feature>
+            <preference name="com.xinstall.app_key" value="$XINSTALL_APPKEY"/>
+        </config-file>
+        
+        <!-- Plugin source code -->
+        <header-file src="src/ios/CDVXinstall.h" />
+        <source-file src="src/ios/CDVXinstall.m" />
+        <source-file src="src/ios/AppDelegate+Xinstall.m" />
+        <header-file src="src/ios/CDVXinstallSaveDataManager.h" />
+        <source-file src="src/ios/CDVXinstallSaveDataManager.m" />
+        <header-file src="src/ios/libs/XinstallSDK.h" />
+        <header-file src="src/ios/libs/XinstallData.h" />
+        <header-file src="src/ios/libs/XinstallDefault.h" />
+        <source-file src="src/ios/libs/libXinstallSDK.a" framework="true" />
+        
+    </platform>
+</plugin>
+    
+    
