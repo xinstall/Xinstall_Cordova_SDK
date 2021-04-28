@@ -31,6 +31,13 @@
 }
 
 #pragma mark - CDVPlugin methods
+- (void)handleOpenURL:(NSNotification *)notification {
+    NSURL *url = [notification object];
+    if ([url isKindOfClass:[NSURL class]]) {
+        [XinstallSDK handleSchemeURL:url];
+    }
+}
+
 - (void)getInstallParams:(CDVInvokedUrlCommand *)command {
     __weak __typeof(self) weakSelf = self;
     [[XinstallSDK defaultManager] getInstallParamsWithCompletion:^(XinstallData * _Nullable installData, XinstallError * _Nullable error) {
