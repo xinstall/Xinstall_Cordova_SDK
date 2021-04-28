@@ -81,9 +81,10 @@ window.xinstall.getInstallParams(function(data) {
 成功回调的data数据为
 
 ```json
-{"channelCode":"渠道号","timeSpan":"获取数据间隔时间","data":{"uo":"{\"testkey\":\"1111\"}","co":""}}
+{"channelCode":"渠道号","timeSpan":"获取数据间隔时间","data":{"uo":"{\"testkey\":\"1111\"}","co":""},"isFirstFetch":true}
 // uo 为页面参事
 // co 为点击参数
+// isFirstFetch 是否第一次获取安装参数
 ```
 
 ### 4. 渠道统计相关

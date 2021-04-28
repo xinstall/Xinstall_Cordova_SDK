@@ -59,7 +59,7 @@
             if (installData.timeSpan > 0) {
                 timeSpan = [NSString stringWithFormat:@"%zd",installData.timeSpan];
             }
-            installMsgDic = @{@"channelCode": channelCode,@"timeSpan":timeSpan, @"data": datas};
+            installMsgDic = @{@"channelCode": channelCode,@"timeSpan":timeSpan, @"data": datas,@"isFirstFetch":@(installData.isFirstFetch)};
              
         }
         CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[installMsgDic copy]];
@@ -72,6 +72,7 @@
         // 调起已执行，并有数据
         [self.marrWakeUpCallbackId addObject:command.callbackId];
         CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self.dicWakeUp copy]];
+        commandResult.keepCallback = @(YES);
         [self.commandDelegate sendPluginResult:commandResult callbackId:command.callbackId];
         self.dicWakeUp = nil;
     } else {
@@ -154,6 +155,7 @@
         for (int i = 0; i < self.marrWakeUpCallbackId.count; i++) {
             NSString *callBackId = [self.marrWakeUpCallbackId objectAtIndex:i];
             CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[wakeMsgDic copy]];
+            commandResult.keepCallback = @(YES);
             [self.commandDelegate sendPluginResult:commandResult callbackId:callBackId];
         }
     } else {
