@@ -283,7 +283,7 @@ NSString * const XinstallThirdPlatform = @"XINSTALL_THIRDPLATFORM_CORDOVA_THIRDP
 }
 
 - (NSInteger)xiSdkType {
-    return 1;
+    return 10;
 }
 
 @end
