@@ -7,6 +7,9 @@
 
 #import "CDVXinstall.h"
 
+NSString * const XinstallThirdVersion = @"XINSTALL_THIRDSDKVERSION_1.3.0_THIRDSDKVERSION_XINSTALL";
+NSString * const XinstallThirdPlatform = @"XINSTALL_THIRDPLATFORM_CORDOVA_THIRDPLATFORM_XINSTALL";
+
 @interface CDVXinstall()
 
 @property (nonatomic, strong) NSMutableArray *marrWakeUpCallbackId;
@@ -67,6 +70,8 @@
         //暂时没有使用 传入的appKey
         self.appKey = appKey;
         [XinstallSDK initWithDelegate:self];
+        NSLog(@"%@",XinstallThirdVersion);
+        NSLog(@"%@",XinstallThirdPlatform);
     }
 }
 #pragma mark - public methods
@@ -270,6 +275,15 @@
         _marrWakeUpCallbackId = [[NSMutableArray alloc] init];
     }
     return _marrWakeUpCallbackId;
+}
+
+#pragma mark - version methods
+- (NSString *)xiSdkThirdVersion {
+    return @"1.3.0";
+}
+
+- (NSInteger)xiSdkType {
+    return 1;
 }
 
 @end
