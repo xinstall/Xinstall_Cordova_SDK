@@ -25,7 +25,7 @@ public class XinstallPlugin extends CordovaPlugin {
 
     private CallbackContext wakeupCallbackContext = null;
 
-    private boolean isOpenYyb = false;
+    private boolean isOpenYyb = true;
 
     @Override
     protected void pluginInitialize() {
@@ -63,10 +63,11 @@ public class XinstallPlugin extends CordovaPlugin {
         } else if ("reportEffectEvent".equals(action)) {
             reportEffectEvent(args, callbackContext);
             return true;
-        } else if ("openYybWakeUp".equals(action)) {
-            openYybWakeUp(callbackContext);
-            return true;
-        }
+        } 
+		// else if ("openYybWakeUp".equals(action)) {
+  //           openYybWakeUp(callbackContext);
+  //           return true;
+  //       }
 
         return false;
     }
@@ -122,9 +123,9 @@ public class XinstallPlugin extends CordovaPlugin {
         });
     }
 
-    protected void openYybWakeUp(final CallbackContext callbackContext) {
-        this.isOpenYyb = true;
-    }
+    // protected void openYybWakeUp(final CallbackContext callbackContext) {
+    //     this.isOpenYyb = true;
+    // }
 
     protected void reportRegister(final CallbackContext callbackContext) {
         Log.d(XinstallPlugin, "reportRegister");
