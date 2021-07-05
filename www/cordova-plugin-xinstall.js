@@ -24,6 +24,14 @@ module.exports = {
         function pass() {};
         exec(pass, pass, "XinstallPlugin", "reportRegister", []);
     },
+	
+	/**
+	 * 开启应用宝功能
+	 */
+	openYybWakeUp: function() {
+	    function pass() {};
+	    exec(pass, pass, "XinstallPlugin", "openYybWakeUp", []);
+	}
 
     /**
      * 上报事件

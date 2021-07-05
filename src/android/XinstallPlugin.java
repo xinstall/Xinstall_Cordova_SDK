@@ -1,5 +1,7 @@
 package io.xinstall.cordova;// TOM
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
@@ -23,6 +25,8 @@ public class XinstallPlugin extends CordovaPlugin {
 
     private CallbackContext wakeupCallbackContext = null;
 
+    private boolean isOpenYyb = false;
+
     @Override
     protected void pluginInitialize() {
         super.pluginInitialize();
@@ -33,9 +37,11 @@ public class XinstallPlugin extends CordovaPlugin {
     public void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         if (wakeupCallbackContext != null) {
-            getWakeUpParams(intent, wakeupCallbackContext);
+            getWakeUpParams(cordova.getActivity(),intent, wakeupCallbackContext);
         }
     }
+
+
 
     @Override
     public boolean execute(String action, CordovaArgs args, CallbackContext callbackContext) throws JSONException {
@@ -57,6 +63,9 @@ public class XinstallPlugin extends CordovaPlugin {
         } else if ("reportEffectEvent".equals(action)) {
             reportEffectEvent(args, callbackContext);
             return true;
+        } else if ("openYybWakeUp".equals(action)) {
+            openYybWakeUp(callbackContext);
+            return true;
         }
 
         return false;
@@ -67,14 +76,18 @@ public class XinstallPlugin extends CordovaPlugin {
         XInstall.init(cordova.getContext());
     }
 
-    private void getWakeUpParams(Intent intent, final CallbackContext callbackContext) {
+    private void getWakeUpParams(Activity activity, Intent intent, final CallbackContext callbackContext) {
+        if ((intent.getCategories() != null  && intent.getCategories().contains(Intent.CATEGORY_LAUNCHER)) && this.isOpenYyb == false) {
+            return;
+        }
+
         Log.d(XinstallPlugin,"getWakeUpParams  intent : " + intent.getDataString());
-        XInstall.getWakeUpParam(intent, new XWakeUpAdapter() {
+        XInstall.getWakeUpParam(activity, intent, new XWakeUpAdapter() {
             @Override
             public void onWakeUp(XAppData xAppData) {
                 if (xAppData != null) {
                     JSONObject jsonObject = xAppData.toJsonObject();
-                    
+
                     PluginResult result = new PluginResult(PluginResult.Status.OK, jsonObject);
                     result.setKeepCallback(true);
                     callbackContext.sendPluginResult(result);
@@ -109,6 +122,10 @@ public class XinstallPlugin extends CordovaPlugin {
         });
     }
 
+    protected void openYybWakeUp(final CallbackContext callbackContext) {
+        this.isOpenYyb = true;
+    }
+
     protected void reportRegister(final CallbackContext callbackContext) {
         Log.d(XinstallPlugin, "reportRegister");
         XInstall.reportRegister();
@@ -131,11 +148,18 @@ public class XinstallPlugin extends CordovaPlugin {
         callbackContext.sendPluginResult(result);
 
         Intent intent = cordova.getActivity().getIntent();
-        if (intent == null || TextUtils.isEmpty(intent.getDataString())) {
+        if (intent == null)
+        {
             return;
         }
+
+        if (intent.getAction().equals(Intent.ACTION_VIEW)) {
+            if (TextUtils.isEmpty(intent.getDataString())) {
+                return;
+            }
+        }
         if (wakeupCallbackContext != null) {
-            getWakeUpParams(intent, wakeupCallbackContext);
+            getWakeUpParams(cordova.getActivity(), this.cordova.getActivity().getIntent(), wakeupCallbackContext);
         }
     }
 }
