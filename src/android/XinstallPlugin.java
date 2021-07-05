@@ -78,9 +78,9 @@ public class XinstallPlugin extends CordovaPlugin {
     }
 
     private void getWakeUpParams(Activity activity, Intent intent, final CallbackContext callbackContext) {
-        if ((intent.getCategories() != null  && intent.getCategories().contains(Intent.CATEGORY_LAUNCHER)) && this.isOpenYyb == false) {
-            return;
-        }
+        // if ((intent.getCategories() != null  && intent.getCategories().contains(Intent.CATEGORY_LAUNCHER)) && this.isOpenYyb == false) {
+        //     return;
+        // }
 
         Log.d(XinstallPlugin,"getWakeUpParams  intent : " + intent.getDataString());
         XInstall.getWakeUpParam(activity, intent, new XWakeUpAdapter() {
