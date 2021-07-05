@@ -31,7 +31,7 @@ module.exports = {
 	openYybWakeUp: function() {
 	    function pass() {};
 	    exec(pass, pass, "XinstallPlugin", "openYybWakeUp", []);
-	}
+	},
 
     /**
      * 上报事件
