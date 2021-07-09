@@ -62,9 +62,11 @@ window.xinstall.registerWakeUpHandler(function(data) {
 
 ![](res/2.png)
 
-在Xcode中配置Xinstall为当前应用生成的关联域名 (Associated Domains) ：**applinks:xxxx.xinstall.top**
+在Xcode中配置Xinstall为当前应用生成的关联域名 (Associated Domains) ：**applinks:xxxx.xinstall.top** 和 **applinks:xxxx.xinstall.net**
 
-![](res/3.png)
+> 具体的关联域名可在 Xinstall管理后台 - 对应的应用控制台 - iOS下载配置 页面中找到
+
+![](https://doc.xinstall.com/Cordova/res/3.png)
 
 ### 3. 携带参数安装
 
