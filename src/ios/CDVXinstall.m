@@ -7,7 +7,7 @@
 
 #import "CDVXinstall.h"
 
-NSString * const XinstallThirdVersion = @"XINSTALL_THIRDSDKVERSION_1.3.5_THIRDSDKVERSION_XINSTALL";
+NSString * const XinstallThirdVersion = @"XINSTALL_THIRDSDKVERSION_1.5.0_THIRDSDKVERSION_XINSTALL";
 NSString * const XinstallThirdPlatform = @"XINSTALL_THIRDPLATFORM_CORDOVA_THIRDPLATFORM_XINSTALL";
 
 @interface CDVXinstall()
@@ -69,7 +69,6 @@ NSString * const XinstallThirdPlatform = @"XINSTALL_THIRDPLATFORM_CORDOVA_THIRDP
     if (appKey){
         //暂时没有使用 传入的appKey
         self.appKey = appKey;
-        [XinstallSDK initWithDelegate:self];
         NSLog(@"%@",XinstallThirdVersion);
         NSLog(@"%@",XinstallThirdPlatform);
     }
@@ -84,6 +83,29 @@ NSString * const XinstallThirdPlatform = @"XINSTALL_THIRDPLATFORM_CORDOVA_THIRDP
     NSURL *url = [notification object];
     if ([url isKindOfClass:[NSURL class]]) {
         [XinstallSDK handleSchemeURL:url];
+    }
+}
+
+
+- (void)setLog:(CDVInvokedUrlCommand *)command {
+    if (command.arguments.count != 0) {
+        // 有参数
+        BOOL isOpen = [command.arguments objectAtIndex:0];
+        [XinstallSDK setShowLog:isOpen];
+    }
+}
+- (void)initNoAd:(CDVInvokedUrlCommand *)command {
+    [XinstallSDK initWithDelegate:self];
+}
+- (void)initWithAd:(CDVInvokedUrlCommand *)command {
+    if (command.arguments.count != 0) {
+        // 有idfa参数
+        NSString *idfa = [command.arguments objectAtIndex:4];
+        if([idfa isKindOfClass:[NSString class]] && idfa.length > 0) {
+            [XinstallSDK initWithDelegate:self idfa:idfa];
+        } else {
+                NSLog(@"广告接入需要传入idfa");
+        }
     }
 }
 
@@ -279,7 +301,7 @@ NSString * const XinstallThirdPlatform = @"XINSTALL_THIRDPLATFORM_CORDOVA_THIRDP
 
 #pragma mark - version methods
 - (NSString *)xiSdkThirdVersion {
-    return @"1.3.0";
+    return @"1.5.0";
 }
 
 - (NSInteger)xiSdkType {

@@ -3,8 +3,13 @@ package io.xinstall.cordova;// TOM
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.shubao.xinstallapp.R;
+import com.xinstall.XINConfiguration;
 import com.xinstall.XInstall;
 import com.xinstall.listener.XInstallAdapter;
 import com.xinstall.listener.XWakeUpAdapter;
@@ -24,24 +29,22 @@ public class XinstallPlugin extends CordovaPlugin {
     public static final  String XinstallPlugin = "XinstallPlugin";
 
     private CallbackContext wakeupCallbackContext = null;
+    private JSONObject wakeupCallbackJsonObject = null;
 
-    private boolean isOpenYyb = true;
+    private Intent wakeupIntent = null;
+    private Activity wakeupActivity = null;
 
-    @Override
-    protected void pluginInitialize() {
-        super.pluginInitialize();
-        init();
-    }
+    private boolean hasCallInit = false;
+    private boolean initialized = false;
+    private boolean registerWakeup = false;
+
+    private static final Handler UIHandler = new Handler(Looper.getMainLooper());
 
     @Override
     public void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        if (wakeupCallbackContext != null) {
-            getWakeUpParams(cordova.getActivity(),intent, wakeupCallbackContext);
-        }
+        getWakeUpParams(cordova.getActivity(),intent);
     }
-
-
 
     @Override
     public boolean execute(String action, CordovaArgs args, CallbackContext callbackContext) throws JSONException {
@@ -52,57 +55,208 @@ public class XinstallPlugin extends CordovaPlugin {
         }
 
         if ("getInstallParams".equals(action)) {
-            getInstallParams(args, callbackContext);
+            runInUIThread(new Runnable() {
+                @Override
+                public void run() {
+                    getInstallParams(args, callbackContext);
+                }
+            });
             return true;
         } else if ("registerWakeUpHandler".equals(action)) {
-            registerWakeUpHandler(callbackContext);
+            runInUIThread(new Runnable() {
+                @Override
+                public void run() {
+                    registerWakeUpHandler(callbackContext);
+                }
+            });
             return true;
         } else if ("reportRegister".equals(action)) {
-            reportRegister(callbackContext);
+            runInUIThread(new Runnable() {
+                @Override
+                public void run() {
+                    reportRegister(callbackContext);
+                }
+            });
+
             return true;
         } else if ("reportEffectEvent".equals(action)) {
-            reportEffectEvent(args, callbackContext);
+            runInUIThread(new Runnable() {
+                @Override
+                public void run() {
+                    reportEffectEvent(args, callbackContext);
+                }
+            });
             return true;
-        } 
-		// else if ("openYybWakeUp".equals(action)) {
-  //           openYybWakeUp(callbackContext);
-  //           return true;
-  //       }
-
+        } else if ("initNoAd".equals(action)) {
+            runInUIThread(new Runnable() {
+                @Override
+                public void run() {
+                    initNoAd();
+                }
+            });
+            return true;
+        } else if ("initWithAd".equals(action)){
+            runInUIThread(new Runnable() {
+                @Override
+                public void run() {
+                    initWithAd(args,callbackContext);
+                }
+            });
+			return true;
+		} else if ("setLog".equals(action)) {
+            runInUIThread(new Runnable() {
+                @Override
+                public void run() {
+                    setLog(args);
+                }
+            });
+            return true;
+        }
         return false;
     }
 
-    protected void init() {
-        Log.d(XinstallPlugin,"init");
-        XInstall.init(cordova.getContext());
+    private  static void runInUIThread(Runnable runnable) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            // 当前线程为UI主线程
+            runnable.run();
+        } else {
+            UIHandler.post(runnable);
+        }
     }
 
-    private void getWakeUpParams(Activity activity, Intent intent, final CallbackContext callbackContext) {
-        // if ((intent.getCategories() != null  && intent.getCategories().contains(Intent.CATEGORY_LAUNCHER)) && this.isOpenYyb == false) {
-        //     return;
-        // }
+    protected void setLog(CordovaArgs args) {
+        if (args != null && !args.isNull(0)) {
+            Log.d(XinstallPlugin,"setLog");
+            boolean isOpen = args.optBoolean(0);
+            XInstall.setDebug(isOpen);
+        }
+    }
 
-        Log.d(XinstallPlugin,"getWakeUpParams  intent : " + intent.getDataString());
-        XInstall.getWakeUpParam(activity, intent, new XWakeUpAdapter() {
-            @Override
-            public void onWakeUp(XAppData xAppData) {
-                if (xAppData != null) {
-                    JSONObject jsonObject = xAppData.toJsonObject();
+    protected void initNoAd() {
+		hasCallInit = true;
+        Log.d(XinstallPlugin,"init");
+        XInstall.init(cordova.getContext());
+		initialized();
+    }
+	
+	protected void initWithAd(CordovaArgs args, final CallbackContext callbackContext) {
+		hasCallInit = true;
+		Log.d(XinstallPlugin,"initWithAd");
+		boolean adEnable = false;
+		if (args != null && !args.isNull(0)) {
+			adEnable = args.optBoolean(0);
+		}
+		String oaid = "";
+		if (args != null && !args.isNull(1)) {
+		    oaid = args.optString(1);
+        }
+		String gaid = "";
+		if (args != null && !args.isNull(2)) {
+		    gaid = args.optString(2);
+        }
+		boolean isPremission = true;
+		if (args != null && !args.isNull(3)) {
+		    isPremission = args.optBoolean(3);
+        }
 
-                    PluginResult result = new PluginResult(PluginResult.Status.OK, jsonObject);
-                    result.setKeepCallback(true);
-                    callbackContext.sendPluginResult(result);
-                } else {
-                    PluginResult result = new PluginResult(PluginResult.Status.OK);
-                    result.setKeepCallback(true);
-                    callbackContext.sendPluginResult(result);
+		final XINConfiguration configuration = XINConfiguration.Builder().adEnable(true);
+		if (!"".equals(gaid)) {
+		    configuration.gaid(gaid);
+        }
+        if (!"".equals(oaid)) {
+            configuration.oaid(oaid);
+        }
+
+        if (isPremission) {
+            XInstall.initWithPermission(cordova.getContext(), configuration, new Runnable() {
+                @Override
+                public void run() {
+                    initialized();
+					callbackContext.success();
                 }
-            }
-        });
+            });
+        } else {
+            XInstall.init(cordova.getContext(),configuration);
+            initialized();
+			callbackContext.success();
+        }
+	}
+
+    private void initialized() {
+        initialized = true;
+        if (wakeupIntent != null && wakeupActivity != null) {
+            XInstall.getWakeUpParam(wakeupActivity, wakeupIntent, new XWakeUpAdapter() {
+                @Override
+                public void onWakeUp(XAppData xAppData) {
+                    if (xAppData != null) {
+                        JSONObject jsonObject = xAppData.toJsonObject();
+
+                        Log.d(XinstallPlugin, jsonObject.toString());
+                        if (!registerWakeup) {
+                            Log.d(XinstallPlugin, "没有注册 wakeupCallback");
+                            wakeupCallbackJsonObject = jsonObject;
+                            return;
+                        }
+
+                        PluginResult result = new PluginResult(PluginResult.Status.OK, jsonObject);
+                        result.setKeepCallback(true);
+                        wakeupCallbackContext.sendPluginResult(result);
+                    } else {
+                        if (!registerWakeup) {
+                            Log.d(XinstallPlugin, "没有注册 wakeupCallback");
+                            wakeupCallbackJsonObject = null;
+                            return;
+                        }
+                        PluginResult result = new PluginResult(PluginResult.Status.OK);
+                        result.setKeepCallback(true);
+                        wakeupCallbackContext.sendPluginResult(result);
+                    }
+                }
+            });
+        }
+    }
+
+    private void getWakeUpParams(Activity activity, Intent intent) {
+        if (initialized) {
+            Log.d(XinstallPlugin,"getWakeUpParams  intent : " + intent.getDataString());
+            XInstall.getWakeUpParam(activity, intent, new XWakeUpAdapter() {
+                @Override
+                public void onWakeUp(XAppData xAppData) {
+                    if (xAppData != null) {
+                        JSONObject jsonObject = xAppData.toJsonObject();
+
+                        Log.d(XinstallPlugin, jsonObject.toString());
+                        if (!registerWakeup) {
+                            Log.d(XinstallPlugin, "没有注册 wakeupCallback");
+                            wakeupCallbackJsonObject = jsonObject;
+                            return;
+                        }
+
+                        PluginResult result = new PluginResult(PluginResult.Status.OK, jsonObject);
+                        result.setKeepCallback(true);
+                        wakeupCallbackContext.sendPluginResult(result);
+                    } else {
+                        if (!registerWakeup) {
+                            Log.d(XinstallPlugin, "没有注册 wakeupCallback");
+                            wakeupCallbackJsonObject = null;
+                            return;
+                        }
+                        PluginResult result = new PluginResult(PluginResult.Status.OK);
+                        result.setKeepCallback(true);
+                        wakeupCallbackContext.sendPluginResult(result);
+                    }
+                }
+            });
+        } else {
+            wakeupIntent = intent;
+            wakeupActivity = activity;
+        }
+
+
     }
 
     protected void getInstallParams(CordovaArgs args, final  CallbackContext callbackContext) {
-        int timeout = -1;
+        int timeout = 0;
         if (args != null && !args.isNull(0)) {
             timeout =  args.optInt(0);
         }
@@ -123,10 +277,6 @@ public class XinstallPlugin extends CordovaPlugin {
         });
     }
 
-    // protected void openYybWakeUp(final CallbackContext callbackContext) {
-    //     this.isOpenYyb = true;
-    // }
-
     protected void reportRegister(final CallbackContext callbackContext) {
         Log.d(XinstallPlugin, "reportRegister");
         XInstall.reportRegister();
@@ -142,25 +292,27 @@ public class XinstallPlugin extends CordovaPlugin {
     }
 
     protected void registerWakeUpHandler(CallbackContext callbackContext) {
-        //只能注册一个回调
-        this.wakeupCallbackContext = callbackContext;
-        PluginResult result = new PluginResult(PluginResult.Status.NO_RESULT);
-        result.setKeepCallback(true);
-        callbackContext.sendPluginResult(result);
-
-        Intent intent = cordova.getActivity().getIntent();
-        if (intent == null)
-        {
+        if (!hasCallInit) {
+            Log.d(XinstallPlugin,"未执行SDK 初始化方法, SDK 需要手动初始化(初始方法为 init 和 initWithAd !)");
             return;
         }
+        
+        //只能注册一个回调
+        registerWakeup = true;
+        this.wakeupCallbackContext = callbackContext;
 
-        if (intent.getAction().equals(Intent.ACTION_VIEW)) {
-            if (TextUtils.isEmpty(intent.getDataString())) {
-                return;
-            }
-        }
-        if (wakeupCallbackContext != null) {
-            getWakeUpParams(cordova.getActivity(), this.cordova.getActivity().getIntent(), wakeupCallbackContext);
-        }
+        
+
+        if (wakeupCallbackContext != null && wakeupCallbackJsonObject != null) {
+            PluginResult result2 = new PluginResult(PluginResult.Status.OK, wakeupCallbackJsonObject);
+            result2.setKeepCallback(true);
+            wakeupCallbackContext.sendPluginResult(result2);
+            
+        } else {
+			PluginResult result = new PluginResult(PluginResult.Status.NO_RESULT);
+			result.setKeepCallback(true);
+			callbackContext.sendPluginResult(result);
+		}
     }
 }
+

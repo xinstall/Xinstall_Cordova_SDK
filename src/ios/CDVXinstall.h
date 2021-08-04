@@ -14,6 +14,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSString *appKey;
 
 // 给Cordova调用的方法
+- (void)setLog:(CDVInvokedUrlCommand *)command;
+- (void)initNoAd:(CDVInvokedUrlCommand *)command;
+- (void)initWithAd:(CDVInvokedUrlCommand *)command;
 - (void)getInstallParams:(CDVInvokedUrlCommand *)command;
 - (void)registerWakeUpHandler:(CDVInvokedUrlCommand *)command;
 - (void)reportRegister:(CDVInvokedUrlCommand *)command;

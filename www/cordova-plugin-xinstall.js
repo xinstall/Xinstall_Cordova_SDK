@@ -1,6 +1,43 @@
 var exec = require('cordova/exec');
 
 module.exports = {
+	
+	/**
+	 * 不接入广告的初始化方法
+	 */
+	init: function() {
+		function pass() {};
+		exec(pass,pass,"XinstallPlugin","initNoAd",[])
+	},
+	
+	initWithAd: function (params,premissedBackBlock) {
+		function pass() {};
+		
+		var adEnable = params.adEnable;
+		if (adEnable == null) {
+			adEnable = false;
+		} 
+		
+		var oaid = params.oaid;
+	    var gaid = params.gaid;
+		var isPremission = params.isPremission;
+		
+		if (premissedBackBlock == null) {
+			premissedBackBlock = pass;
+		}
+			
+		var idfa = params.idfa;
+		
+		exec(premissedBackBlock,pass,"XinstallPlugin","initWithAd",[adEnable,oaid,gaid,isPremission,idfa]);
+	} ,
+	
+	
+	setLog: function (isOpen) {
+		function pass() {};
+		exec(pass,pass,"XinstallPlugin","setLog",[isOpen]);
+	},
+	
+	
     /**
      * 获取安装参数
      * @param onSuccess 成功回调：数据格式为 {'channelCode': 1002, 'data': {'key': 'value'}}
@@ -24,14 +61,6 @@ module.exports = {
         function pass() {};
         exec(pass, pass, "XinstallPlugin", "reportRegister", []);
     },
-	
-	// /**
-	//  * 开启应用宝功能
-	//  */
-	// openYybWakeUp: function() {
-	//     function pass() {};
-	//     exec(pass, pass, "XinstallPlugin", "openYybWakeUp", []);
-	// },
 
     /**
      * 上报事件
