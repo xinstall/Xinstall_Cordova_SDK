@@ -257,7 +257,7 @@ window.xinstall.reportEffectEvent(eventId, eventVal);
 
 ##### 5.3.2 Android 端
 
-无特殊需要注意，如碰上相关合规问题，参考 [《应用合规指南》](
+无特殊需要注意，如碰上相关合规问题，参考 [《应用合规指南》](https://doc.xinstall.com/应用合规指南.html)
 
 
 
