@@ -104,8 +104,12 @@ NSString * const XinstallThirdPlatform = @"XINSTALL_THIRDPLATFORM_CORDOVA_THIRDP
         if([idfa isKindOfClass:[NSString class]] && idfa.length > 0) {
             [XinstallSDK initWithDelegate:self idfa:idfa];
         } else {
-                NSLog(@"广告接入需要传入idfa");
+            NSLog(@"广告接入需要传入idfa");
+            [XinstallSDK initWithDelegate:self];
         }
+        
+        CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:@{}];
+        [self.commandDelegate sendPluginResult:commandResult callbackId:command.callbackId];
     }
 }
 
