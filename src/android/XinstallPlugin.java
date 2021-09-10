@@ -87,7 +87,15 @@ public class XinstallPlugin extends CordovaPlugin {
                 }
             });
             return true;
-        } else if ("initNoAd".equals(action)) {
+        } else if ("reportShareById".equals(action)) {
+			runInUIThread(new Runnable() {
+				@Override
+				public void run() {
+				    reportShareById(args, callbackContext);
+				}
+			});
+			return true;
+		} else if ("initNoAd".equals(action)) {
             runInUIThread(new Runnable() {
                 @Override
                 public void run() {
@@ -286,10 +294,33 @@ public class XinstallPlugin extends CordovaPlugin {
         if (args != null && !args.isNull(0) && !args.isNull(1)) {
             String eventId = args.optString(0);
             long eventValue = args.optLong(1);
+
+            if (eventId.length() == 0) {
+                Log.d(XinstallPlugin,"eventId 参数不得为空");
+                return;
+            }
+
+            if (eventValue == 0) {
+                Log.d(XinstallPlugin,"eventValue 参数不得为空");
+                return;
+            }
+
             Log.d(XinstallPlugin, "reportEffectEvent # eventId:" + eventId + ", eventValue:" + eventValue);
             XInstall.reportPoint(eventId, (int) eventValue);
         }
     }
+	
+	protected void reportShareById(CordovaArgs args, final CallbackContext callbackContext) {
+		if (args != null && !args.isNull(0)) {
+			String userId = args.optString(0);
+			if (userId.length() == 0) {
+			    Log.d(XinstallPlugin,"userId 参数不得为空");
+			    return;
+            }
+			Log.d(XinstallPlugin, "reportShareById # userId:" + userId + ", userId:" + userId);
+			XInstall.reportShareById(userId);
+		}
+	}
 
     protected void registerWakeUpHandler(CallbackContext callbackContext) {
         if (!hasCallInit) {

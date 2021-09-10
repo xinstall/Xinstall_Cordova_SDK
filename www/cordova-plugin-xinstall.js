@@ -70,5 +70,13 @@ module.exports = {
     reportEffectEvent: function(eventId, eventValue){
         function pass() {};
         exec(pass, pass, "XinstallPlugin", "reportEffectEvent", [eventId, eventValue]);
-    }
+    },
+	/**
+	 * 分享裂变事件上报
+	 * @param userId 用户Id
+	 */
+	reportShareById: function(userId) {
+	    function pass() {};
+	    exec(pass, pass, "XinstallPlugin", "reportShareById",[userId]);
+	}
 };
