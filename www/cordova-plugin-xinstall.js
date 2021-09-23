@@ -55,6 +55,13 @@ module.exports = {
     },
 
     /**
+     * 注册唤醒监听（会返回相关错误）
+     */
+    registerWakeUpDetailHandler: function(onSuccess, onError){
+    	exec(onSuccess, onError, "XinstallPlugin", "registerWakeUpDetailHandler",[]);
+    },
+
+    /**
      * 注册统计
      */
     reportRegister: function(){
@@ -75,8 +82,8 @@ module.exports = {
 	 * 分享裂变事件上报
 	 * @param userId 用户Id
 	 */
-	reportShareById: function(userId) {
+	reportShareByXinShareId: function(userId) {
 	    function pass() {};
-	    exec(pass, pass, "XinstallPlugin", "reportShareById",[userId]);
+	    exec(pass, pass, "XinstallPlugin", "reportShareByXinShareId",[userId]);
 	}
 };
