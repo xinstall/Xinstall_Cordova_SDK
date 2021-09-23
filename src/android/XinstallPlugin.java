@@ -412,6 +412,7 @@ public class XinstallPlugin extends CordovaPlugin {
             PluginResult result = new PluginResult(PluginResult.Status.NO_RESULT);
             result.setKeepCallback(true);
             callbackContext.sendPluginResult(result);
+            getWakeUpParams(cordova.getActivity(),cordova.getActivity().getIntent());
         }
     }
 
@@ -440,6 +441,7 @@ public class XinstallPlugin extends CordovaPlugin {
             PluginResult result = new PluginResult(PluginResult.Status.NO_RESULT);
             result.setKeepCallback(true);
             callbackContext.sendPluginResult(result);
+            getWakeUpParams(cordova.getActivity(),cordova.getActivity().getIntent());
         }
     }
 
