@@ -27,8 +27,15 @@ module.exports = {
 		}
 			
 		var idfa = params.idfa;
+		if (idfa == null) {
+			idfa = "";
+		}
+		var asaToken = params.asaToken;
+		if (asaToken == null) {
+			asaToken = "";
+		}
 		
-		exec(premissedBackBlock,pass,"XinstallPlugin","initWithAd",[adEnable,oaid,gaid,isPremission,idfa]);
+		exec(premissedBackBlock,pass,"XinstallPlugin","initWithAd",[adEnable,oaid,gaid,isPremission,idfa,asaToken]);
 	} ,
 	
 	

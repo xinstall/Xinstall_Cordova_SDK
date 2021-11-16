@@ -7,14 +7,18 @@
 
 #import "CDVXinstall.h"
 
-NSString * const XinstallThirdVersion = @"XINSTALL_THIRDSDKVERSION_1.5.0_THIRDSDKVERSION_XINSTALL";
+NSString * const XinstallThirdVersion = @"XINSTALL_THIRDSDKVERSION_1.5.5_THIRDSDKVERSION_XINSTALL";
 NSString * const XinstallThirdPlatform = @"XINSTALL_THIRDPLATFORM_CORDOVA_THIRDPLATFORM_XINSTALL";
 
 @interface CDVXinstall()
 
 @property (nonatomic, strong) NSMutableArray *marrWakeUpCallbackId;
 
+@property (nonatomic, strong) NSMutableArray *marrWakeUpDetailCallbackId;
+
 @property (nonatomic, strong) NSDictionary *dicWakeUp;
+
+@property (nonatomic, strong) NSDictionary *dicWakeUpDetail;
 
 @end
 
@@ -94,20 +98,19 @@ NSString * const XinstallThirdPlatform = @"XINSTALL_THIRDPLATFORM_CORDOVA_THIRDP
         [XinstallSDK setShowLog:isOpen];
     }
 }
+
 - (void)initNoAd:(CDVInvokedUrlCommand *)command {
     [XinstallSDK initWithDelegate:self];
 }
+
 - (void)initWithAd:(CDVInvokedUrlCommand *)command {
-    if (command.arguments.count != 0) {
+    if (command.arguments.count >= 6) {
         // 有idfa参数
         NSString *idfa = [command.arguments objectAtIndex:4];
-        if([idfa isKindOfClass:[NSString class]] && idfa.length > 0) {
-            [XinstallSDK initWithDelegate:self idfa:idfa];
-        } else {
-            NSLog(@"广告接入需要传入idfa");
-            [XinstallSDK initWithDelegate:self];
-        }
+        NSString *asaToken = [command.arguments objectAtIndex:5];
         
+        [XinstallSDK initWithDelegate:self idfa:idfa asaToken:asaToken];
+                
         CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:@{}];
         [self.commandDelegate sendPluginResult:commandResult callbackId:command.callbackId];
     }
@@ -163,6 +166,7 @@ NSString * const XinstallThirdPlatform = @"XINSTALL_THIRDPLATFORM_CORDOVA_THIRDP
              
         }
         CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[installMsgDic copy]];
+        [commandResult setKeepCallbackAsBool:YES];
         [self.commandDelegate sendPluginResult:commandResult callbackId:command.callbackId];
     }];
 }
@@ -174,6 +178,7 @@ NSString * const XinstallThirdPlatform = @"XINSTALL_THIRDPLATFORM_CORDOVA_THIRDP
         // 调起已执行，并有数据
         [self.marrWakeUpCallbackId addObject:command.callbackId];
         CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self.dicWakeUp copy]];
+        [commandResult setKeepCallbackAsBool:YES];
         [self.commandDelegate sendPluginResult:commandResult callbackId:command.callbackId];
         self.dicWakeUp = nil;
     } else {
@@ -199,6 +204,30 @@ NSString * const XinstallThirdPlatform = @"XINSTALL_THIRDPLATFORM_CORDOVA_THIRDP
             effectValue = (long)[val longLongValue];
         }
         [[XinstallSDK defaultManager] reportEventPoint:effectEvent eventValue:effectValue];
+    }
+}
+
+- (void)registerWakeUpDetailHandler:(CDVInvokedUrlCommand *)command {
+    if (self.dicWakeUpDetail) {
+        // 调起已执行，并有数据
+        [self.marrWakeUpDetailCallbackId addObject:command.callbackId];
+        CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self.dicWakeUpDetail copy]];
+        [commandResult setKeepCallbackAsBool:YES];
+        [self.commandDelegate sendPluginResult:commandResult callbackId:command.callbackId];
+        self.dicWakeUpDetail = nil;
+    } else {
+        [self.marrWakeUpDetailCallbackId addObject:command.callbackId];
+    }
+    
+}
+- (void)reportShareByXinShareId:(CDVInvokedUrlCommand *)command {
+    NSString *shareId = @"";
+    if (command.arguments.count != 0) {
+        id userId = [command.arguments objectAtIndex:0];
+        if ([userId isKindOfClass:[NSString class]]) {
+            shareId = userId;
+        }
+        [[XinstallSDK defaultManager] reportShareByXinShareId:shareId];
     }
 }
 
@@ -232,8 +261,7 @@ NSString * const XinstallThirdPlatform = @"XINSTALL_THIRDPLATFORM_CORDOVA_THIRDP
 }
 
 #pragma mark - XinstallDelegate methods
-- (void)xinstall_getWakeUpParams:(XinstallData *)appData {
-    
+- (void)xinstall_getWakeUpParams:(XinstallData *)appData error:(XinstallError *)error {
     NSDictionary *wakeMsgDic = @{};
     
     if (![CDVXinstall isEmptyData:appData]) {
@@ -279,20 +307,44 @@ NSString * const XinstallThirdPlatform = @"XINSTALL_THIRDPLATFORM_CORDOVA_THIRDP
         }
 
         wakeMsgDic = @{@"channelCode": channelCode,@"timeSpan":timeSpan, @"data": dataDic};
+        
+        if (self.marrWakeUpCallbackId.count > 0) {
+            self.dicWakeUp = nil;
+            for (int i = 0; i < self.marrWakeUpCallbackId.count; i++) {
+                NSString *callBackId = [self.marrWakeUpCallbackId objectAtIndex:i];
+                CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[wakeMsgDic copy]];
+                [commandResult setKeepCallbackAsBool:YES];
+                [self.commandDelegate sendPluginResult:commandResult callbackId:callBackId];
+            }
+        } else {
+            @synchronized (self) {
+                self.dicWakeUp = wakeMsgDic;
+            }
+        }
+    }
+    NSDictionary *mdicError = @{};
+    if (error != nil) {
+        mdicError = @{@"errorType":@(error.type),@"errorMsg":error.errorMsg};
     }
     
+    NSDictionary *dicWakeupDetail = @{@"wakeUpData":wakeMsgDic,@"error":mdicError};
     
-    if (self.marrWakeUpCallbackId.count > 0) {
-        for (int i = 0; i < self.marrWakeUpCallbackId.count; i++) {
-            NSString *callBackId = [self.marrWakeUpCallbackId objectAtIndex:i];
-            CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[wakeMsgDic copy]];
+    if (self.marrWakeUpDetailCallbackId.count > 0) {
+        self.dicWakeUpDetail = nil;
+        for (int i = 0; i < self.marrWakeUpDetailCallbackId.count ; i++) {
+            NSString *callBackId = [self.marrWakeUpDetailCallbackId objectAtIndex:i];
+            CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[dicWakeupDetail copy]];
+            [commandResult setKeepCallbackAsBool:YES];
             [self.commandDelegate sendPluginResult:commandResult callbackId:callBackId];
         }
     } else {
         @synchronized (self) {
-            self.dicWakeUp = wakeMsgDic;
+            self.dicWakeUpDetail = dicWakeupDetail;
         }
     }
+    
+    
+    
 }
 
 #pragma mark - setter and getter methods
@@ -303,9 +355,16 @@ NSString * const XinstallThirdPlatform = @"XINSTALL_THIRDPLATFORM_CORDOVA_THIRDP
     return _marrWakeUpCallbackId;
 }
 
+- (NSMutableArray *)marrWakeUpDetailCallbackId {
+    if (_marrWakeUpDetailCallbackId == nil) {
+        _marrWakeUpDetailCallbackId = [[NSMutableArray alloc] init];
+    }
+    return _marrWakeUpDetailCallbackId;
+}
+
 #pragma mark - version methods
 - (NSString *)xiSdkThirdVersion {
-    return @"1.5.0";
+    return @"1.5.5";
 }
 
 - (NSInteger)xiSdkType {
