@@ -6,6 +6,9 @@
 //
 
 #import "CDVXinstall.h"
+#if __has_include(<AdServices/AAAttribution.h>)
+    #import <AdServices/AAAttribution.h>
+#endif
 
 NSString * const XinstallThirdVersion = @"XINSTALL_THIRDSDKVERSION_1.5.5_THIRDSDKVERSION_XINSTALL";
 NSString * const XinstallThirdPlatform = @"XINSTALL_THIRDPLATFORM_CORDOVA_THIRDPLATFORM_XINSTALL";
@@ -103,11 +106,29 @@ NSString * const XinstallThirdPlatform = @"XINSTALL_THIRDPLATFORM_CORDOVA_THIRDP
     [XinstallSDK initWithDelegate:self];
 }
 
++ (NSString *)getASAToken {
+#if __has_include(<AdServices/AAAttribution.h>)
+    if (@available(iOS 14.3, *)) {
+        NSError *error;
+        NSString *asaToken = [AAAttribution attributionTokenWithError:&error];
+        return asaToken;
+    } else {
+        return @"";
+    }
+#else
+    return @"";
+#endif
+}
+
 - (void)initWithAd:(CDVInvokedUrlCommand *)command {
     if (command.arguments.count >= 6) {
         // 有idfa参数
         NSString *idfa = [command.arguments objectAtIndex:4];
-        NSString *asaToken = [command.arguments objectAtIndex:5];
+        Boolean asaEnable = [[command.arguments objectAtIndex:5] boolValue];
+        NSString *asaToken = @"";
+        if (asaEnable) {
+            asaToken = [CDVXinstall getASAToken];
+        }
         
         [XinstallSDK initWithDelegate:self idfa:idfa asaToken:asaToken];
                 
