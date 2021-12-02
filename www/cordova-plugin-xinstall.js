@@ -1,3 +1,4 @@
+cordova.define("cordova-plugin-xinstall.xinstall", function(require, exports, module) {
 var exec = require('cordova/exec');
 
 module.exports = {
@@ -30,12 +31,12 @@ module.exports = {
 		if (idfa == null) {
 			idfa = "";
 		}
-		var asaToken = params.asaToken;
-		if (asaToken == null) {
-			asaToken = "";
+		var asaEnable = params.asaEnable;
+		if (asaEnable == null) {
+            asaEnable = false;
 		}
 		
-		exec(premissedBackBlock,pass,"XinstallPlugin","initWithAd",[adEnable,oaid,gaid,isPremission,idfa,asaToken]);
+		exec(premissedBackBlock,pass,"XinstallPlugin","initWithAd",[adEnable,oaid,gaid,isPremission,idfa,asaEnable]);
 	} ,
 	
 	
@@ -85,7 +86,8 @@ module.exports = {
         function pass() {};
         exec(pass, pass, "XinstallPlugin", "reportEffectEvent", [eventId, eventValue]);
     },
-	/**
+
+    /**
 	 * 分享裂变事件上报
 	 * @param userId 用户Id
 	 */
@@ -94,3 +96,4 @@ module.exports = {
 	    exec(pass, pass, "XinstallPlugin", "reportShareByXinShareId",[userId]);
 	}
 };
+});
