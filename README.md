@@ -51,12 +51,94 @@ window.xinstall.init();
 调用以下代码注册拉起回调，应尽早调用。如在 `deviceready` 事件回调之时注册
 
 ```js
+// 第一种回调方法 只有是wakeup 操作才会回调------------
 window.xinstall.registerWakeUpHandler(function(data) {
        // 对data进行处理
 }, function(msg){
        console.log("xinstall.wakeup error : " + msg)
 });
+// -----------------------------------------------
+
+// 第二种回调方法， 只要调用方法，就一定有回调------------
+ window.xinstall.registerWakeUpDetailHandler(function(data) {
+       // 对data进行处理
+},function(msg) {
+        console.log("xinstall.registerWakeUpDetailHandler : " + msg)
+});
+//-----------------------------------------------------
 ```
+
+【注】：两种回调方法选择一个使用。
+
+两种回调返回的data格式分别为：
+
+```json
+// 第一种回调的json 数据
+{
+    "channelCode":"渠道编号",  // 字符串类型。渠道编号，没有渠道编号时为 ""
+    "data":{									// 对象类型。唤起时携带的参数。
+        "co":{								// co 为唤醒页面中通过 Xinstall Web SDK 中的点击按钮传递的数据，key & value 均可自定义，key & value 数量不限制
+            "自定义key1":"自定义value1", 
+            "自定义key2":"自定义value2"
+        },
+        "uo":{   							// uo 为唤醒页面 URL 中 ? 后面携带的标准 GET 参数，key & value 均可自定义，key & value 数量不限制
+            "自定义key1":"自定义value1",
+            "自定义key2":"自定义value2"
+        }
+    }
+}
+
+// 第二种回调的json 数据
+{
+  "wakeUpData":
+  {
+    "channelCode":"渠道编号",  // 字符串类型。渠道编号，没有渠道编号时为 ""
+    "data":{									// 对象类型。唤起时携带的参数。
+        "co":{								// co 为唤醒页面中通过 Xinstall Web SDK 中的点击按钮传递的数据，key & value 均可自定义，key & value 数量不限制
+            "自定义key1":"自定义value1", 
+            "自定义key2":"自定义value2"
+        },
+        "uo":{   							// uo 为唤醒页面 URL 中 ? 后面携带的标准 GET 参数，key & value 均可自定义，key & value 数量不限制
+            "自定义key1":"自定义value1",
+            "自定义key2":"自定义value2"
+        }
+    }
+  },
+  "error": 
+  {
+    "errorType" : 7,					// 数字类型。代表错误的类型，具体数字对应类型可在下方查看
+    "errorMsg" : "xxxxx"			// 字符串类型。错误的描述
+  }
+}
+
+
+/** errorType 对照表：
+ * iOS
+ * -1 : SDK 配置错误；
+ * 0 : 未知错误；
+ * 1 : 网络错误；
+ * 2 : 没有获取到数据；
+ * 3 : 该 App 已被 Xinstall 后台封禁；
+ * 4 : 该操作不被允许（一般代表调用的方法没有开通权限）；
+ * 5 : 入参不正确；
+ * 6 : SDK 初始化未成功完成；
+ * 7 : 没有通过 Xinstall Web SDK 集成的页面拉起；
+ *
+ * Android
+ * 1006 : 未执行init 方法;
+ * 1007 : 未传入Activity，Activity 未比传参数
+ * 1008 : 用户未知操作 不处理
+ * 1009 : 不是唤醒执行的调用方法
+ * 1010 : 前后两次调起时间小于1s，请求过于频繁
+ * 1011 : 获取调起参数失败
+ * 1012 : 重复获取调起参数
+ * 1013 : 本次调起并非为XInstall的调起
+ * 1004 : 无权限
+ * 1014 : SCHEME URL 为空
+ */
+```
+
+
 
 **iOS 由于使用Universal Link 技术**
 
@@ -173,6 +255,11 @@ window.xinstall.reportEffectEvent(eventId, eventVal);
              <th>字符串</th>
              <th>iOS 系统中的广告标识符</th>
          </tr>
+    			<tr>
+             <th>asaEnable</th>
+             <th>boolean</th>
+             <th>是否开启 ASA 渠道，不需要时可以不传。详见《8. 苹果搜索广告（ASA）渠道功能》</th>
+         </tr>
      </table>
 
 
@@ -206,20 +293,20 @@ window.xinstall.reportEffectEvent(eventId, eventVal);
 ```javascript
 
   // oaid和gaid 为选传，不传则代表使用SDK自动去获取（SDK内不包括OAID SDK，需要自己接入）
-  xinstall.initWithAd({adEnabled:true,idfa:"idfa需要自己传入",oaid:"oaid测试",gaid:"测试"});
+  window.xinstall.initWithAd({adEnabled:true,idfa:"idfa需要自己传入",oaid:"oaid测试",gaid:"测试",asaEnable:true});
   // 如果希望在完成初始化，立即执行之后的步骤可以通过 下列代码实现-------------------------
-  //window.xinstall.initWithAd({adEnable:true,idfa:"外部获取的idfa"},function() {
+  //window.xinstall.initWithAd({adEnable:true,idfa:"外部获取的idfa",asaEnable:true},function() {
 	//		window.xinstall.getInstallParams 或者 window.xinstall.registerWakeUpHandler 等操作
 	//});
   //-----------------------------------------------------------------------------
 
 ```
 
-##### 5.3、上架须知
+##### 7.3、上架须知
 
 **在使用了广告平台渠道后，若您的 App 需要上架，请认真阅读本段内容。**
 
-##### 5.3.1 iOS 端：上架 App Store
+##### 7.3.1 iOS 端：上架 App Store
 
 1. 如果您的 App 没有接入苹果广告（即在 App 中显示苹果投放的广告），那么在提交审核时，在广告标识符中，请按照下图勾选：
 
@@ -255,9 +342,66 @@ window.xinstall.reportEffectEvent(eventId, eventVal);
 
 ![AppStore_IDFA_6](https://cdn.xinstall.com/iOS_SDK%E7%B4%A0%E6%9D%90/IDFA_6.png)
 
-##### 5.3.2 Android 端
+##### 7.3.2 Android 端
 
 无特殊需要注意，如碰上相关合规问题，参考 [《应用合规指南》](https://doc.xinstall.com/应用合规指南.html)
+
+### 8. 苹果搜索广告（ASA）渠道功能
+
+>  如果您在 Xinstall 管理后台对应 App 中，**不使用「ASA渠道」，则无需进行本小节中额外的集成工作**，也能正常使用 Xinstall 提供的其他功能。
+
+#### 8.1 更换初始化方法
+
+**使用新的 initWithAd 方法，替代原先的 init 方法来进行模块的初始化**
+
+## **initWithAd**
+
+**入参说明**：需要主动传入参数，JSON对象
+
+入参内部字段：
+
+* iOS 端：
+
+  <table>
+         <tr>
+             <th>参数名</th>
+             <th>参数类型</th>
+             <th>描述 </th>
+         </tr>
+         <tr>
+             <th>idfa</th>
+             <th>string</th>
+             <th>iOS 系统中的广告标识符（不需要时可以不传）</th>
+         </tr>
+         <tr>
+             <th>asaEnable</th>
+             <th>boolean</th>
+             <th>是否开启 ASA 渠道，true 时为开启，false 或者不传时均为不开启</th>
+         </tr>
+     </table>
+
+**回调说明**：无需传入回调函数
+
+**调用示例**
+
+```javascript
+// idfa 为广告传入参数，如果未使用到，可以不传入
+window.xinstall.initWithAd({asaEnable:true},function() {
+       // 初始化回调 为选传参数
+       window.xinstall.getInstallParams(function(data){
+                
+       }, 10);
+ });
+ 
+```
+
+**可用性**
+
+iOS系统
+
+可提供的 1.5.5 及更高版本
+
+
 
 
 
