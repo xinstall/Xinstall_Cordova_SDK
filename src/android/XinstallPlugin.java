@@ -102,6 +102,14 @@ public class XinstallPlugin extends CordovaPlugin {
                 }
             });
             return true;
+        } else if ("reportEventWhenOpenDetailInfo".equals(action)) {
+            runInUIThread(new Runnable() {
+                @Override
+                public void run() {
+                    reportEventWhenOpenDetailInfo(args, callbackContext);
+                }
+            });
+            return true;
         } else if ("reportShareByXinShareId".equals(action)) {
 			runInUIThread(new Runnable() {
 				@Override
@@ -355,6 +363,27 @@ public class XinstallPlugin extends CordovaPlugin {
     protected void reportRegister(final CallbackContext callbackContext) {
         Log.d(XinstallPlugin, "reportRegister");
         XInstall.reportRegister();
+    }
+
+    protected void reportEventWhenOpenDetailInfo(CordovaArgs args, final CallbackContext callbackContext) {
+        if (args != null && !args.isNull(0) && !args.isNull(1) && !args.isNull(2)) {
+            String eventId = args.optString(0);
+            long eventValue = args.optLong(1);
+            String eventSubValue = args.optString(2);
+
+            if (eventId.length() == 0) {
+                Log.d(XinstallPlugin,"eventId 参数不得为空");
+                return;
+            }
+
+            if (eventValue == 0) {
+                Log.d(XinstallPlugin,"eventValue 参数不得为空");
+                return;
+            }
+
+            Log.d(XinstallPlugin, "reportEffectEvent # eventId:" + eventId + ", eventValue:" + eventValue + ", eventSubValue:" + eventSubValue);
+            XInstall.reportEventWhenOpenDetailInfo(eventId, (int) eventValue,eventSubValue);
+        }
     }
 
     protected void reportEffectEvent(CordovaArgs args, final CallbackContext callbackContext) {
