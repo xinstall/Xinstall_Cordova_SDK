@@ -86,17 +86,6 @@ module.exports = {
         function pass() {};
         exec(pass, pass, "XinstallPlugin", "reportEffectEvent", [eventId, eventValue]);
     },
-	
-	/**
-	 * 上报事件明细
-	 * @param eventId 事件ID
-	 * @param eventValue 事件值 (数字类型)
-	 * @param eventSubValue 事件明细值
-	 */
-	reportEventWhenOpenDetailInfo: function(eventId, eventValue, eventSubValue) {
-	    function pass() {};
-	    exec(pass, pass, "XinstallPlugin", "reportEventWhenOpenDetailInfo", [eventId, eventValue, eventSubValue]);
-	},
 
     /**
 	 * 分享裂变事件上报

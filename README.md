@@ -2,10 +2,6 @@
 
 > Xinstall 为了方便Cordova开发同学接入SDK的封装SDK
 
-> 【重要说明】：从 v1.5.0 版本（含）开始，调用 Xinstall 模块的任意方法前，必须先调用一次初始化方法（init 或者 initWithAd），否则将导致其他方法无法正常调用。
->
-> 从 v1.5.0 以下升级到 v1.5.0 以上版本后，需要自行修改代码调用初始化方法，Xinstall 模块无法在升级后自动兼容。
-
 ## 前期准备
 
 1. 在Xinstall官网注册自己的账号
@@ -181,7 +177,7 @@ window.xinstall.getInstallParams(function(data) {
 // isFirstFetch 是否第一次获取安装参数
 ```
 
-### 5. 事件统计相关
+### 5. 渠道统计相关
 
 #### 5.1 注册量统计
 
@@ -189,7 +185,7 @@ window.xinstall.getInstallParams(function(data) {
 window.xinstall.reportRegister();
 ```
 
-#### 5.2 事件统计
+#### 5.2 渠道效果统计
 
 ```js
 window.xinstall.reportEffectEvent(eventId, eventVal);
@@ -198,30 +194,6 @@ window.xinstall.reportEffectEvent(eventId, eventVal);
 **补充说明**
 
 只有 Xinstall 后台创建事件统计，并且代码中 **传递的事件ID** 与 **后台创建的ID** 一致时，上报数据才会被统计。
-
-#### 5.3 事件明细统计
-
-> 除了旧有事件业务，我们还开发了事件明细统计，用来统计各个事件具体发生情况。
->
-> 1.5.7 及以后版本可用
-
-在使用之前要现在后台管理系统中打开该事件明细统计功能，具体如下：
-
-![](https://cdn.xinstall.com/iOS_SDK%E7%B4%A0%E6%9D%90/event.png)
-
-在开启权限之后，我们直接使用Xinstall SDK 的`reportEventWhenOpenDetailInfo`方法上传单个事件的第二个详细值
-
-```js
-window.xinstall.reportEventWhenOpenDetailInfo(eventId, eventVal,eventSubValue);
-```
-
-最终在事件列表中可以点击查看查阅具体详情的内容
-
-![](https://cdn.xinstall.com/iOS_SDK%E7%B4%A0%E6%9D%90/event_detail_list.png)
-
-
-
-
 
 ### 6. 广告平台渠道功能
 

@@ -10,7 +10,7 @@
     #import <AdServices/AAAttribution.h>
 #endif
 
-NSString * const XinstallThirdVersion = @"XINSTALL_THIRDSDKVERSION_1.5.7_THIRDSDKVERSION_XINSTALL";
+NSString * const XinstallThirdVersion = @"XINSTALL_THIRDSDKVERSION_1.7.4_THIRDSDKVERSION_XINSTALL";
 NSString * const XinstallThirdPlatform = @"XINSTALL_THIRDPLATFORM_CORDOVA_THIRDPLATFORM_XINSTALL";
 
 @interface CDVXinstall()
@@ -228,32 +228,6 @@ NSString * const XinstallThirdPlatform = @"XINSTALL_THIRDPLATFORM_CORDOVA_THIRDP
     }
 }
 
-- (void)reportEventWhenOpenDetailInfo:(CDVInvokedUrlCommand *)command {
-    NSString *eventId = @"";
-    long eventValue = 0;
-    NSString *eventSubValue = @"";
-    if (command.arguments.count != 0) {
-        // 有参数
-        id point = [command.arguments objectAtIndex:0];
-        if ([point isKindOfClass:[NSString class]]) {
-            eventId = (NSString *)point;
-        }
-        id val = [command.arguments objectAtIndex:1];
-        if ([val isKindOfClass:[NSNumber class]] || [val isKindOfClass:[NSString class]]){
-            eventValue = (long)[val longLongValue];
-        }
-        
-        id subVal = [command.arguments objectAtIndex:2];
-        if ([subVal isKindOfClass:[NSString class]]) {
-            eventSubValue = (NSString *)subVal;
-        }
-        [[XinstallSDK defaultManager] reportEventWhenOpenDetailInfoWithEventPoint:eventId eventValue:eventValue subValue:eventSubValue];
-    }
-}
-
-
-
-
 - (void)registerWakeUpDetailHandler:(CDVInvokedUrlCommand *)command {
     if (self.dicWakeUpDetail) {
         // 调起已执行，并有数据
@@ -411,7 +385,7 @@ NSString * const XinstallThirdPlatform = @"XINSTALL_THIRDPLATFORM_CORDOVA_THIRDP
 
 #pragma mark - version methods
 - (NSString *)xiSdkThirdVersion {
-    return @"1.5.7";
+    return @"1.7.4";
 }
 
 - (NSInteger)xiSdkType {
