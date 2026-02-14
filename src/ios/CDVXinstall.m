@@ -10,7 +10,7 @@
     #import <AdServices/AAAttribution.h>
 #endif
 
-NSString * const XinstallThirdVersion = @"XINSTALL_THIRDSDKVERSION_1.7.4_THIRDSDKVERSION_XINSTALL";
+NSString * const XinstallThirdVersion = @"XINSTALL_THIRDSDKVERSION_1.7.6_THIRDSDKVERSION_XINSTALL";
 NSString * const XinstallThirdPlatform = @"XINSTALL_THIRDPLATFORM_CORDOVA_THIRDPLATFORM_XINSTALL";
 
 @interface CDVXinstall()
@@ -385,7 +385,7 @@ NSString * const XinstallThirdPlatform = @"XINSTALL_THIRDPLATFORM_CORDOVA_THIRDP
 
 #pragma mark - version methods
 - (NSString *)xiSdkThirdVersion {
-    return @"1.7.4";
+    return @"1.7.6";
 }
 
 - (NSInteger)xiSdkType {
